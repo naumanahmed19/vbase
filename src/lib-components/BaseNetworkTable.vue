@@ -92,6 +92,14 @@ export default {
       type: String,
       default: '',
 	  },
+    beforeRender: {
+      type: Function,
+      default: (e)=>e,
+    },
+    responseKey:{
+      type: String,
+      default: '',
+    },
   },
 
 
@@ -161,12 +169,20 @@ export default {
 				  this.tableData = res.data;
 			 }
 
-
         this.data = res.data;
         if (this.tableDataProperty) {
           this.data = res.data[this.tableDataProperty];
         }
 
+
+        /**
+         * Filter Data
+         * 
+         */
+        if(this.beforeRender){
+          console.log('rendering...')
+          this.data = this.beforeRender(this.data)
+        }
 
         if (typeof res.data === 'object') {
           this.$nextTick(() => this.retrieveSelection());
