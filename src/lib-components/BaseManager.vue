@@ -527,7 +527,7 @@ export default {
         deleteUrl = `${this.deleteRoute}/${id}`;
       }
       this.loading = true;
-      await axios
+      await this.$http
         .delete(deleteUrl)
         .then((response) => {
           this.$message({
