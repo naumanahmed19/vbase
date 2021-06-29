@@ -649,7 +649,7 @@ var script$2 = {
 
                 _this7.loading = true;
                 _context.next = 5;
-                return axios.delete(deleteUrl).then(function (response) {
+                return _this7.$http.delete(deleteUrl).then(function (response) {
                   _this7.$message({
                     type: 'success',
                     message: 'Deleted'
@@ -914,7 +914,7 @@ var __vue_inject_styles__$2 = undefined;
 var __vue_scope_id__$2 = undefined;
 /* module identifier */
 
-var __vue_module_identifier__$2 = "data-v-74376ccc";
+var __vue_module_identifier__$2 = "data-v-f6ce8ddc";
 /* functional template */
 
 var __vue_is_functional_template__$2 = false;

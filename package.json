@@ -1,6 +1,6 @@
 {
   "name": "vbase",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "",
   "main": "dist/vbase.ssr.js",
   "browser": "dist/vbase.esm.js",

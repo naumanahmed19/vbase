@@ -529,7 +529,7 @@ var script$2 = {
       }
 
       this.loading = true;
-      await axios.delete(deleteUrl).then(response => {
+      await this.$http.delete(deleteUrl).then(response => {
         this.$message({
           type: 'success',
           message: 'Deleted'
