@@ -169,20 +169,22 @@ export default {
 				  this.tableData = res.data;
 			 }
 
+
+        /**
+         *  Hook: Before Data Display in table
+         * 
+         */
+        if(this.beforeRender){
+          this.tableData = this.beforeRender(this.tableData)
+        }
+
         this.data = res.data;
         if (this.tableDataProperty) {
           this.data = res.data[this.tableDataProperty];
         }
 
 
-        /**
-         * Filter Data
-         * 
-         */
-        if(this.beforeRender){
-          console.log('rendering...')
-          this.data = this.beforeRender(this.data)
-        }
+     
 
         if (typeof res.data === 'object') {
           this.$nextTick(() => this.retrieveSelection());
