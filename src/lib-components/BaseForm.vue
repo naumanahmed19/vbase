@@ -54,7 +54,6 @@
 
 <script>
 export default {
-   name: 'VbaseSample',
   props: {
     form: {
       type: Object,

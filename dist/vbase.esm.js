@@ -53,7 +53,6 @@
 //
 //
 var script = {
-  name: 'VbaseSample',
   props: {
     form: {
       type: Object,
