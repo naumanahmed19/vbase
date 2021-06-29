@@ -1,4 +1,11 @@
 
 
 /* eslint-disable import/prefer-default-export */
-export { default as BaseForm } from './BaseForm.vue';
+import BaseManager  from './BaseManager.vue';
+import BaseNetworkTable  from './BaseNetworkTable.vue';
+import BaseForm  from './BaseForm.vue';
+
+export {
+    BaseManager,
+    BaseNetworkTable,
+    BaseForm }
