@@ -135,6 +135,7 @@
                 @row-dbclick="rowDoubleClick"
                 @loading="(loading) => this.loading = loading"
                 @selection="updateSelection"
+                :beforeRender="beforeRender"
               >
                 <slot name="columns" />
 
@@ -314,6 +315,10 @@ export default {
     beforeDelete: {
       type: Function,
       default: () => true,
+    },
+    beforeRender: {
+      type: Function,
+     default: (e)=>e,
     },
     deleteRoute: {
       type: String,
