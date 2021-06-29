@@ -189,6 +189,7 @@
 //
 //
 //
+//
 var script$2 = {
   props: {
     paginationInclude: {
@@ -304,6 +305,10 @@ var script$2 = {
     beforeDelete: {
       type: Function,
       default: () => true
+    },
+    beforeRender: {
+      type: Function,
+      default: e => e
     },
     deleteRoute: {
       type: String,
@@ -727,7 +732,8 @@ var __vue_render__$2 = function () {
       "filters": this.filters,
       "pagination": _vm.hasPagination,
       "size": _vm.size,
-      "fields": _vm.fields
+      "fields": _vm.fields,
+      "beforeRender": _vm.beforeRender
     },
     on: {
       "data-change": _vm.setData,
@@ -903,6 +909,14 @@ var script$1 = {
     tableDataProperty: {
       type: String,
       default: ''
+    },
+    beforeRender: {
+      type: Function,
+      default: e => e
+    },
+    responseKey: {
+      type: String,
+      default: ''
     }
   },
 
@@ -969,6 +983,16 @@ var script$1 = {
 
         if (this.tableDataProperty) {
           this.data = res.data[this.tableDataProperty];
+        }
+        /**
+         * Filter Data
+         * 
+         */
+
+
+        if (this.beforeRender) {
+          console.log('rendering...');
+          this.data = this.beforeRender(this.data);
         }
 
         if (typeof res.data === 'object') {

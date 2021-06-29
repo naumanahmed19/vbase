@@ -298,6 +298,7 @@ function _nonIterableRest() {
 //
 //
 //
+//
 var script$2 = {
   props: {
     paginationInclude: {
@@ -414,6 +415,12 @@ var script$2 = {
       type: Function,
       default: function _default() {
         return true;
+      }
+    },
+    beforeRender: {
+      type: Function,
+      default: function _default(e) {
+        return e;
       }
     },
     deleteRoute: {
@@ -835,7 +842,8 @@ var __vue_render__$2 = function __vue_render__() {
       "filters": this.filters,
       "pagination": _vm.hasPagination,
       "size": _vm.size,
-      "fields": _vm.fields
+      "fields": _vm.fields,
+      "beforeRender": _vm.beforeRender
     },
     on: {
       "data-change": _vm.setData,
@@ -906,7 +914,7 @@ var __vue_inject_styles__$2 = undefined;
 var __vue_scope_id__$2 = undefined;
 /* module identifier */
 
-var __vue_module_identifier__$2 = "data-v-3351cd0a";
+var __vue_module_identifier__$2 = "data-v-74376ccc";
 /* functional template */
 
 var __vue_is_functional_template__$2 = false;
@@ -1009,6 +1017,16 @@ var script$1 = {
     tableDataProperty: {
       type: String,
       default: ''
+    },
+    beforeRender: {
+      type: Function,
+      default: function _default(e) {
+        return e;
+      }
+    },
+    responseKey: {
+      type: String,
+      default: ''
     }
   },
   data: function data() {
@@ -1069,6 +1087,16 @@ var script$1 = {
 
         if (_this.tableDataProperty) {
           _this.data = res.data[_this.tableDataProperty];
+        }
+        /**
+         * Filter Data
+         * 
+         */
+
+
+        if (_this.beforeRender) {
+          console.log('rendering...');
+          _this.data = _this.beforeRender(_this.data);
         }
 
         if (_typeof(res.data) === 'object') {
@@ -1231,7 +1259,7 @@ var __vue_inject_styles__$1 = undefined;
 var __vue_scope_id__$1 = undefined;
 /* module identifier */
 
-var __vue_module_identifier__$1 = "data-v-639ec1b6";
+var __vue_module_identifier__$1 = "data-v-4167bc8e";
 /* functional template */
 
 var __vue_is_functional_template__$1 = false;
