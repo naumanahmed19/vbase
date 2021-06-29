@@ -1082,21 +1082,20 @@ var script$1 = {
         } else {
           _this.tableData = res.data;
         }
-
-        _this.data = res.data;
-
-        if (_this.tableDataProperty) {
-          _this.data = res.data[_this.tableDataProperty];
-        }
         /**
-         * Filter Data
+         *  Hook: Before Data Display in table
          * 
          */
 
 
         if (_this.beforeRender) {
-          console.log('rendering...');
-          _this.data = _this.beforeRender(_this.data);
+          _this.tableData = _this.beforeRender(_this.tableData);
+        }
+
+        _this.data = res.data;
+
+        if (_this.tableDataProperty) {
+          _this.data = res.data[_this.tableDataProperty];
         }
 
         if (_typeof(res.data) === 'object') {
@@ -1259,7 +1258,7 @@ var __vue_inject_styles__$1 = undefined;
 var __vue_scope_id__$1 = undefined;
 /* module identifier */
 
-var __vue_module_identifier__$1 = "data-v-4167bc8e";
+var __vue_module_identifier__$1 = "data-v-562f49f6";
 /* functional template */
 
 var __vue_is_functional_template__$1 = false;

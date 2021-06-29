@@ -978,21 +978,20 @@ var script$1 = {
         } else {
           this.tableData = res.data;
         }
-
-        this.data = res.data;
-
-        if (this.tableDataProperty) {
-          this.data = res.data[this.tableDataProperty];
-        }
         /**
-         * Filter Data
+         *  Hook: Before Data Display in table
          * 
          */
 
 
         if (this.beforeRender) {
-          console.log('rendering...');
-          this.data = this.beforeRender(this.data);
+          this.tableData = this.beforeRender(this.tableData);
+        }
+
+        this.data = res.data;
+
+        if (this.tableDataProperty) {
+          this.data = res.data[this.tableDataProperty];
         }
 
         if (typeof res.data === 'object') {
