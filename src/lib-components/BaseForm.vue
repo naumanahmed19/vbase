@@ -1,13 +1,16 @@
 <template>
-  <div class="baseform" :class="labelClass">
+  <div
+    class="baseform form-preview"
+    :class="readOnly ?'readOnly':'' "
+  >
     <el-form
       ref="form"
-      label-width="100%"
+      :label-width="labelWidth"
       :model="form"
-      label-position="top"
-      :rules="formRules"
+      :label-position="labelPosition"
+      :rules="rules"
       :disabled="disabled"
-      size="small"
+      :size="size"
       :class="formClass"
     >
       <el-alert
@@ -25,48 +28,83 @@
         show-icon
       >
         <ul class="p-0">
-          <li v-for="error in validationErors.slice().reverse()" :key="error">
+          <li
+            v-for="error in validationErors.slice().reverse()"
+            :key="error"
+          >
             {{ error }}
           </li>
         </ul>
       </el-alert>
       <slot />
 
-      <slot v-if="hasActions" name="actions" />
+      <div v-if="!readOnly">
+        <slot
+          v-if="hasActions"
+          name="actions"
+        />
 
-      <div v-else class="ml-auto mt-3">
-        <el-button
-          type="primary"
-          :class="btnClass"
-          mini
-          plain
-          :loading="loadingSave"
-          :disabled="loadingSave"
-          @click="handleSave()"
+        <div
+          v-else
+          class="ml-auto mt-3"
         >
-          {{ $t(submitBtnLabel) }}
-        </el-button>
+          <el-button
+            type="primary"
+            style="margin-top:25px"
+            :class="btnClass"
+            data-tc="submitButton"
+            mini
+            plain
+            :loading="loadingSave"
+            :disabled="loadingSave"
+            @click="handleSave()"
+          >
+            {{ $t( editing ? updateBtnLabel : submitBtnLabel ) }}
+            &nbsp; {{ submitBtnLabelPostfix }}
+          </el-button>
+          <el-button
+            v-if="hasCancelBtn"
+            type="danger"
+            style="margin-top:25px"
+            :class="btnClass"
+            data-tc="cancelButton"
+            mini
+            plain
+            :disabled="loadingSave"
+            @click="handleCancel"
+          >
+            {{ cancelBtnLabel }}
+          </el-button>
+        </div>
       </div>
     </el-form>
   </div>
 </template>
 
-
 <script>
+import _ from 'lodash'
+/* eslint-disable */ 
 export default {
   props: {
     form: {
       type: Object,
       required: true,
     },
-
+    labelPosition:{
+      type: String,
+      default: "top",
+    },
+    labelWidth: {
+      type: String,
+      default: "100%",
+    },
     editMode: {
       type: Boolean,
       default: false,
     },
     updateMethod: {
       type: String,
-      default: "patch",
+      default: "put",
     },
     url: {
       type: String,
@@ -109,19 +147,46 @@ export default {
 
     submitBtnLabel: {
       type: String,
-      default: "common.action.save",
+      default: "Add",
     },
+    cancelBtnLabel: {
+      type: String,
+      default: "Cancel",
+    },
+    
+    hasCancelBtn: {
+      type: Boolean,
+      default: false,
+    },
+    updateBtnLabel:{
+      type: String,
+      default: "Update",
+    },
+    submitBtnLabelPostfix:{
+      type: String,
+      default: "",
+    },
+    readOnly:{
+      type: Boolean,
+      default: false,
+    },
+  
 
     successPostMessage: {
       type: String,
-      default: "common.msgs.post",
+      default: "Successfully Saved",
     },
     successUpdateMessage: {
       type: String,
-      default: "common.msgs.update",
+      default: "Successfully Updated",
+    },
+    errorMessage:{
+       type: String,
+      default: "oops! Somthing went wrong",
+   
     },
 
-    hasSidebarForm: {
+    inWindow: {
       type: Boolean,
       default: false,
     },
@@ -135,9 +200,29 @@ export default {
       default: "capte__form",
     },
     rules: {
-      type: Object,
-      default: () => {},
+       type: Object,
+       default: () => {},
     },
+    idKey: {
+      type: String,
+      default: '',
+    },
+    postPayload:{
+      type: Array,
+       default: () => [],
+    },
+    putPayload:{
+      type: Array,
+       default: () => [],
+    },
+    size:{
+      type:String,
+      default: 'small'
+    },
+    baseManagerName:{
+      type:String,
+      default: ''
+    }
   },
 
   data() {
@@ -166,20 +251,23 @@ export default {
   },
 
   watch: {
-    form: {
-      handler() {
-        if (this.$refs.form) {
-          Object.keys(this.formRules).forEach((key) => {
-            if (this.form[key]) {
-              delete this.formRules[key];
-            }
-          });
-          this.$refs.form.validate();
-        }
-      },
-      deep: true,
-      immediate: true,
-    },
+    
+  // form: {
+    //   handler() {
+    //     if (this.$refs.form) {
+    //       console.log("validate again....")
+    //       Object.keys(this.formRules).forEach((key) => {
+    //         if (this.form[key] ) {
+    //           console.log(this.form[key])
+    //           delete this.formRules[key];
+    //         }
+    //       });
+    //       this.$refs.form.validate();
+    //     }
+    //   },
+    //   deep: true,
+    //   immediate: true,
+    // },
 
     editMode: {
       handler(isEnabled) {
@@ -197,13 +285,26 @@ export default {
       },
       immediate: true,
     },
+
+    form: {
+      handler() {
+        if(this.form[this.idKey]){
+          console.log(this.form,'in edit')
+          this.editing = true
+        }
+      },
+        immediate: true,
+    }
   },
   mounted() {
+
+  
     this.$events.on("editItem", (data) => {
       this.editing = false;
       this.reset();
       this.$nextTick(() => {
         Object.assign(this.form, data);
+        console.log("enable editing....")
         this.editing = true;
         this.$emit("afterFormDataLoaded");
       });
@@ -217,18 +318,33 @@ export default {
     this.$events.on("resetBaseForm", () => {
       this.reset();
     });
-
     Object.assign(this.formRules, this.rules);
+
+    //check if form emtpy if not then enable edit mode
+
+ 
   },
 
   methods: {
+    handleCancel(){
+      this.reset()
+      this.$emit('onCancel')
+    },
+    isEditMode(){
+      return true
+    },
     patchURL() {
       let { url } = this;
-      if (this.updateUrl) {
+      url  = `${url}/${this.form[this.idKey]}`;
+      if(this.updateUrl && this.idKey){
+         url = `${this.updateUrl}/${this.form[this.idKey]}`;
+      }else if (this.updateUrl) {
         url = this.updateUrl;
-      } else if (this.form.id && !this.disableUrlGen) {
-        url = `${url}/${this.form.id}`;
-      }
+      } 
+      
+      // else if (this.form.id && !this.disableUrlGen) {
+      //   url = `${url}/${this.form.id}`;
+      // }
       return url;
     },
     clearValidation() {
@@ -241,8 +357,9 @@ export default {
       this.editWatchers = [];
     },
     closeSidebar() {
-      if (this.hasSidebarForm) {
-        this.$events.fire("closeit");
+      if (this.inWindow) {
+        console.log('baseform', this.baseManagerName)
+        this.$events.fire("reload", this.baseManagerName);
       }
     },
 
@@ -275,9 +392,19 @@ export default {
     },
 
     put() {
+    
+      let payload = this.beforeSave(this.form);
+
+      /**
+       * Filter payload before making request
+       */
+      if(this.putPayload.length){
+          payload = _.pick(payload,(this.putPayload))
+      }
       this.clearValidation();
+       console.log(this.patchURL())
       return this.$http
-        .put(this.patchURL(), this.beforeSave(this.form), {
+        .put(this.patchURL(),payload, {
           headers: {
             "Content-Type": " application/json",
           },
@@ -294,7 +421,7 @@ export default {
 
             // Can be improvepd with class...
           } else {
-            this.$message.error(this.$t("common.msgs.error"));
+            this.$message.error(this.$t(this.errorMessage));
             this.networkError = true;
           }
         });
@@ -359,8 +486,16 @@ export default {
     store() {
       this.clearValidation();
 
+      let payload = this.beforeSave(this.form);
+      /**
+       * Filter payload before making request
+       */
+        if(this.postPayload.length){
+            payload = _.pick(payload,(this.postPayload))
+        }
+
       return this.$http
-        .post(this.url, this.beforeSave(this.form))
+        .post(this.url, payload)
         .then((res) => {
           this.$message.success(this.$t(this.successPostMessage));
           this.$emit("success-save", res.data);
@@ -412,6 +547,7 @@ export default {
         this.validationErrors(validation);
       }
 
+
       this.$nextTick(() => this.scrollToError());
     },
 
@@ -419,10 +555,18 @@ export default {
      * Create or Update Item
      */
     async handleSave() {
+          Object.assign(this.formRules, this.rules);
+     
+       this.$refs.form.validate(async(valid) => {
+         if(!valid) {
+            this.$nextTick(() => this.scrollToError());
+           return
+         }
+      
       this.networkError = false;
       this.loadingSave = true;
 
-      if (this.url) {
+      if (this.url ||this.updateUrl ) {
         if (this.editMode || this.editing) {
           if (this.updateMethod === "put") {
             await this.put();
@@ -435,9 +579,22 @@ export default {
       } else {
         this.$emit("click-button");
       }
+       });
       this.loadingSave = false;
     },
   },
 };
 </script>
+<style lang="scss" scoped>
 
+.el-textarea.is-disabled .el-textarea__inner{
+    background-color: #FFF !important;
+    border-color: transparent;
+    cursor: not-allowed;
+    color: #606266;
+    font-family: 'Roboto';
+    line-height: 2.0;
+    font-size: 14px;
+    padding: 0,
+  }
+</style>
